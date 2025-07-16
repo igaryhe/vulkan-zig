@@ -8,12 +8,12 @@ fn invalidUsage(prog_name: []const u8, comptime fmt: []const u8, args: anytype) 
 }
 
 fn reportParseErrors(tree: std.zig.Ast) !void {
-    const stderr = std.io.getStdErr().writer();
+    var stderr = std.fs.File.stderr().writer(&.{}).interface;
 
     for (tree.errors) |err| {
         const loc = tree.tokenLocation(0, err.token);
         try stderr.print("(vulkan-zig error):{}:{}: error: ", .{ loc.line + 1, loc.column + 1 });
-        try tree.renderError(err, stderr);
+        try tree.renderError(err, &stderr);
         try stderr.print("\n{s}\n", .{tree.source[loc.line_start..loc.line_end]});
         for (0..loc.column) |_| {
             try stderr.writeAll(" ");
@@ -41,7 +41,8 @@ pub fn main() !void {
     while (args.next()) |arg| {
         if (std.mem.eql(u8, arg, "--help") or std.mem.eql(u8, arg, "-h")) {
             @setEvalBranchQuota(2000);
-            std.io.getStdOut().writer().print(
+            var stdout = std.fs.File.stdout().writer(&.{}).interface;
+            stdout.print(
                 \\Utility to generate a Zig binding from the Vulkan XML API registry.
                 \\
                 \\The most recent Vulkan XML API registry can be obtained from

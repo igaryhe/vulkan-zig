@@ -55,9 +55,9 @@ pub fn isZigPrimitiveType(name: []const u8) bool {
 pub fn writeIdentifier(writer: anytype, id: []const u8) !void {
     // https://github.com/ziglang/zig/issues/2897
     if (isZigPrimitiveType(id)) {
-        try writer.print("@\"{}\"", .{std.zig.fmtEscapes(id)});
+        try writer.print("@\"{f}\"", .{std.zig.fmtString(id)});
     } else {
-        try writer.print("{}", .{std.zig.fmtId(id)});
+        try writer.print("{f}", .{std.zig.fmtId(id)});
     }
 }
 
